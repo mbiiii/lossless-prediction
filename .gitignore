@@ -5,3 +5,6 @@ broadcast/
 node_modules/
 dist/
 .DS_Store
+
+# local env (addresses only, per-machine)
+ui/.env.local
