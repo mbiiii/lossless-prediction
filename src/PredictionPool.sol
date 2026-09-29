@@ -23,6 +23,9 @@ contract PredictionPool {
     uint256 public feeBps = 500; // 5% of yield
     uint256 public immutable endTime;
     uint256 public immutable maxDeposit; // per-round cap (abuse guard, MVP)
+    string public question; // e.g. "Will DOT exceed $10 at round end?"
+    uint256 public strikePrice; // USD with 8 decimals (CoinGecko scale)
+    uint256 public resolvedPrice; // price posted at resolve, 8 decimals
 
     bool public resolved;
     bool public outcomeYes;
@@ -59,14 +62,18 @@ contract PredictionPool {
         address _vtoken,
         address _treasury,
         uint256 _duration,
-        uint256 _maxDeposit
+        uint256 _maxDeposit,
+        string memory _question,
+        uint256 _strikePrice
     ) {
         require(_vtoken != address(0) && _treasury != address(0), "zero addr");
-        require(_duration > 0 && _maxDeposit > 0, "bad params");
+        require(_duration > 0 && _maxDeposit > 0 && _strikePrice > 0, "bad params");
         vtoken = IERC20(_vtoken);
         treasury = _treasury;
         endTime = block.timestamp + _duration;
         maxDeposit = _maxDeposit;
+        question = _question;
+        strikePrice = _strikePrice;
         yesToken = new ReceiptToken("Pool YES", "pYES", address(this));
         noToken = new ReceiptToken("Pool NO", "pNO", address(this));
         owner = msg.sender;
@@ -105,6 +112,19 @@ contract PredictionPool {
         outcomeYes = _outcomeYes;
         disputeEnd = block.timestamp + DISPUTE_WINDOW;
         emit Resolved(_outcomeYes);
+    }
+
+    // Resolver path (M2 bot): owner posts the observed price, outcome is
+    // derived mechanically: price >= strike -> YES wins.
+    function resolveWithPrice(uint256 price) external onlyOwner {
+        require(block.timestamp >= endTime, "round live");
+        require(!resolved, "already resolved");
+        require(price > 0, "bad price");
+        resolved = true;
+        resolvedPrice = price;
+        outcomeYes = price >= strikePrice;
+        disputeEnd = block.timestamp + DISPUTE_WINDOW;
+        emit Resolved(outcomeYes);
     }
 
     // Owner can flip the outcome inside the dispute window.

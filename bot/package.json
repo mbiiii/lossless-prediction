@@ -1,0 +1,12 @@
+{
+  "name": "lossless-resolver-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "resolve": "node resolve.mjs"
+  },
+  "dependencies": {
+    "viem": "2.21.0"
+  }
+}

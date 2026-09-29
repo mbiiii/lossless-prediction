@@ -32,7 +32,7 @@ contract PredictionPoolTest {
 
     function setUp() public {
         v = new MockVToken();
-        pool = new PredictionPool(address(v), treasury, 7 days, 10_000 ether);
+        pool = new PredictionPool(address(v), treasury, 7 days, 10_000 ether, "Will DOT exceed $10 at round end?", 10e8);
         pA = new Player();
         pB = new Player();
         v.mint(address(pA), 1_000 ether);
@@ -65,6 +65,21 @@ contract PredictionPoolTest {
         pB.doClaim(address(pool));
         require(v.balanceOf(address(pA)) == a0 + 100 ether + 7.6 ether, "alice payout wrong");
         require(v.balanceOf(address(pB)) == b0 + 100 ether, "bob principal wrong");
+    }
+
+    function testResolveWithPrice() public {
+        pA.doDeposit(address(pool), 100 ether, true);
+        pB.doDeposit(address(pool), 100 ether, false);
+        v.accrueYield(address(pool), 8 ether);
+        vm.warp(pool.endTime() + 1);
+        pool.resolveWithPrice(12e8); // $12 >= $10 strike -> YES
+        require(pool.outcomeYes(), "should be YES");
+        require(pool.resolvedPrice() == 12e8, "price not stored");
+        vm.warp(pool.disputeEnd() + 1);
+        pool.finalize();
+        uint256 a0 = v.balanceOf(address(pA));
+        pA.doClaim(address(pool));
+        require(v.balanceOf(address(pA)) == a0 + 100 ether + 7.6 ether, "alice payout wrong");
     }
 
     function testLoserPrincipalSafeWhenNoWins() public {
