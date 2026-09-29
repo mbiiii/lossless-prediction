@@ -14,8 +14,8 @@
     "viem": "2.21.0"
   },
   "devDependencies": {
-    "@types/node": "26.6.3",
-    "@types/react": "19.3.0",
-    "typescript": "7.0.2"
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "typescript": "^5.9.3"
   }
 }
