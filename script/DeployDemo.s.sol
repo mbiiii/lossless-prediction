@@ -22,11 +22,11 @@ contract DeployDemo {
         pool = new PredictionPool(
             address(mv),
             msg.sender, // treasury = deployer (testnet only)
-            5 minutes, // short round for demo
+            30 minutes, // video-friendly round: deposit now, resolve in ~30 min
             1_000 ether, // small cap for demo
             "Demo: Will DOT exceed $10 at round end?",
             10e8, // $10 in CoinGecko 8dp scale
-            5 minutes // short dispute window for demo (pilot uses 12h)
+            10 minutes // short dispute window for demo (pilot uses 12h)
         );
         mv.mint(msg.sender, 500 ether);
         VM2.stopBroadcast();
