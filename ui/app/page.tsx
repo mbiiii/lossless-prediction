@@ -13,11 +13,11 @@ import {
   POOL_ADDRESS,
   VTOKEN_ABI,
   VTOKEN_ADDRESS,
-  moonbase,
+  activeChain,
 } from "../lib/pool";
 
 function pub() {
-  return createPublicClient({ chain: moonbase, transport: http() });
+  return createPublicClient({ chain: activeChain, transport: http() });
 }
 
 export default function Home() {
@@ -55,19 +55,27 @@ export default function Home() {
   async function connect() {
     const eth = (window as any).ethereum;
     if (!eth) {
-      setStatus("No wallet found. Install MetaMask / SubWallet with Moonbase Alpha (chain 1287).");
+      setStatus(`No wallet found. Install MetaMask with ${activeChain.name} (chain ${activeChain.id}).`);
       return;
     }
-    const wallet = createWalletClient({ chain: moonbase, transport: custom(eth) });
+    const wallet = createWalletClient({ chain: activeChain, transport: custom(eth) });
     const [addr] = await wallet.requestAddresses();
     setAccount(addr);
     setStatus(`Connected ${addr}`);
+    try {
+      await eth.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: `0x${activeChain.id.toString(16)}` }],
+      });
+    } catch (e: any) {
+      setStatus(`Connected ${addr}. Please switch wallet to ${activeChain.name} (chain ${activeChain.id}).`);
+    }
   }
 
   async function wallet() {
     const eth = (window as any).ethereum;
     if (!eth || !account) throw new Error("connect wallet first");
-    return createWalletClient({ account, chain: moonbase, transport: custom(eth) });
+    return createWalletClient({ account, chain: activeChain, transport: custom(eth) });
   }
 
   async function deposit() {
@@ -104,7 +112,7 @@ export default function Home() {
       <h1>Lossless Prediction Market</h1>
       <p>No-loss vToken price prediction. Principal safe, yield is the prize.</p>
       {!account ? (
-        <button onClick={connect}>Connect wallet (Moonbase 1287)</button>
+        <button onClick={connect}>Connect wallet ({activeChain.name} {activeChain.id})</button>
       ) : (
         <p>Wallet: {account}</p>
       )}

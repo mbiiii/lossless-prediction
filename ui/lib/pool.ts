@@ -1,11 +1,23 @@
 import { parseAbi } from "viem";
 
+// Demo network: Ethereum Sepolia (pool demo live here).
+// Pilot target remains Moonbeam/Moonbase (chain 1287).
+export const demoChain = {
+  id: 11155111,
+  name: "Sepolia",
+  nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: ["https://ethereum-sepolia.publicnode.com"] } },
+} as const;
+
+// Kept for the Moonbeam pilot (M3). UI currently points at demoChain.
 export const moonbase = {
   id: 1287,
   name: "Moonbase Alpha",
   nativeCurrency: { name: "DEV", symbol: "DEV", decimals: 18 },
   rpcUrls: { default: { http: ["https://rpc.api.moonbase.moonbeam.network"] } },
 } as const;
+
+export const activeChain = demoChain;
 
 export const POOL_ABI = parseAbi([
   "function deposit(uint256 amount, bool predictYes)",
