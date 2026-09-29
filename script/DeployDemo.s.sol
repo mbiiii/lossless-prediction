@@ -5,33 +5,30 @@ import "../src/MockVToken.sol";
 import "../src/PredictionPool.sol";
 
 // Cheatcode interface (no forge-std dependency needed).
-interface VmScript {
+interface VmDemo {
     function startBroadcast() external;
     function stopBroadcast() external;
 }
-VmScript constant VM = VmScript(address(uint160(uint256(keccak256("hevm cheat code")))));
+VmDemo constant VM2 = VmDemo(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-// One-shot deploy + seed for testnet demo:
-//   forge script script/DeployTestnet.s.sol --rpc-url $RPC_URL \
+// Demo pool for the 3-minute video walkthrough:
+// 5-minute round + 5-minute dispute window, small cap.
+//   forge script script/DeployDemo.s.sol --rpc-url $RPC_URL \
 //     --private-key $PK --broadcast
-//
-// Deploys MockVToken + PredictionPool ("Will DOT exceed $10?", 7-day round,
-// 10k cap), funds the deployer with 500 mock vDOT for demo deposits.
-// All addresses are printed by forge broadcast logs.
-contract DeployTestnet {
+contract DeployDemo {
     function run() external returns (MockVToken mv, PredictionPool pool) {
-        VM.startBroadcast();
+        VM2.startBroadcast();
         mv = new MockVToken();
         pool = new PredictionPool(
             address(mv),
             msg.sender, // treasury = deployer (testnet only)
-            7 days,
-            10_000 ether,
-            "Will DOT exceed $10 at round end?",
+            5 minutes, // short round for demo
+            1_000 ether, // small cap for demo
+            "Demo: Will DOT exceed $10 at round end?",
             10e8, // $10 in CoinGecko 8dp scale
-            12 hours
+            5 minutes // short dispute window for demo (pilot uses 12h)
         );
         mv.mint(msg.sender, 500 ether);
-        VM.stopBroadcast();
+        VM2.stopBroadcast();
     }
 }

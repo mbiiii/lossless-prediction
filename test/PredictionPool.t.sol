@@ -32,7 +32,7 @@ contract PredictionPoolTest {
 
     function setUp() public {
         v = new MockVToken();
-        pool = new PredictionPool(address(v), treasury, 7 days, 10_000 ether, "Will DOT exceed $10 at round end?", 10e8);
+        pool = new PredictionPool(address(v), treasury, 7 days, 10_000 ether, "Will DOT exceed $10 at round end?", 10e8, 12 hours);
         pA = new Player();
         pB = new Player();
         v.mint(address(pA), 1_000 ether);

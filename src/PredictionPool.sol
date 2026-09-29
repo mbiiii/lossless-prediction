@@ -43,7 +43,7 @@ contract PredictionPool {
     mapping(address => uint256) public principalNo;
     mapping(address => bool) public claimed;
 
-    uint256 public constant DISPUTE_WINDOW = 12 hours;
+    uint256 public immutable disputeWindow; // e.g. 12h pilot, short for demo
     uint256 public constant SWEEP_DELAY = 30 days;
     uint256 public finalizedAt;
 
@@ -64,16 +64,19 @@ contract PredictionPool {
         uint256 _duration,
         uint256 _maxDeposit,
         string memory _question,
-        uint256 _strikePrice
+        uint256 _strikePrice,
+        uint256 _disputeWindow
     ) {
         require(_vtoken != address(0) && _treasury != address(0), "zero addr");
         require(_duration > 0 && _maxDeposit > 0 && _strikePrice > 0, "bad params");
+        require(_disputeWindow > 0, "bad dispute window");
         vtoken = IERC20(_vtoken);
         treasury = _treasury;
         endTime = block.timestamp + _duration;
         maxDeposit = _maxDeposit;
         question = _question;
         strikePrice = _strikePrice;
+        disputeWindow = _disputeWindow;
         yesToken = new ReceiptToken("Pool YES", "pYES", address(this));
         noToken = new ReceiptToken("Pool NO", "pNO", address(this));
         owner = msg.sender;
@@ -110,7 +113,7 @@ contract PredictionPool {
         require(!resolved, "already resolved");
         resolved = true;
         outcomeYes = _outcomeYes;
-        disputeEnd = block.timestamp + DISPUTE_WINDOW;
+        disputeEnd = block.timestamp + disputeWindow;
         emit Resolved(_outcomeYes);
     }
 
@@ -123,7 +126,7 @@ contract PredictionPool {
         resolved = true;
         resolvedPrice = price;
         outcomeYes = price >= strikePrice;
-        disputeEnd = block.timestamp + DISPUTE_WINDOW;
+        disputeEnd = block.timestamp + disputeWindow;
         emit Resolved(outcomeYes);
     }
 

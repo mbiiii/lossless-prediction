@@ -14,6 +14,6 @@ contract Deploy {
         string memory question,
         uint256 strikePrice
     ) external returns (PredictionPool pool) {
-        pool = new PredictionPool(vtoken, treasury, duration, cap, question, strikePrice);
+        pool = new PredictionPool(vtoken, treasury, duration, cap, question, strikePrice, 12 hours);
     }
 }
