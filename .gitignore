@@ -8,3 +8,7 @@ dist/
 
 # local env (addresses only, per-machine)
 ui/.env.local
+
+# next.js build output
+ui/.next/
+ui/out/
