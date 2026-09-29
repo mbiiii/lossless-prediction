@@ -83,10 +83,10 @@ export default function Home() {
       const w = await wallet();
       const amt = parseUnits(amount, 18);
       setStatus("1/2 approving vToken...");
-      await w.writeContract({ address: VTOKEN_ADDRESS, abi: VTOKEN_ABI, functionName: "approve", args: [POOL_ADDRESS, amt] });
+      await w.writeContract({ address: VTOKEN_ADDRESS, abi: VTOKEN_ABI, functionName: "approve", args: [POOL_ADDRESS, amt], gas: 100000n });
       setStatus("2/2 depositing...");
       const h = await w.writeContract({
-        address: POOL_ADDRESS, abi: POOL_ABI, functionName: "deposit", args: [amt, side === "YES"],
+        address: POOL_ADDRESS, abi: POOL_ABI, functionName: "deposit", args: [amt, side === "YES"], gas: 300000n,
       });
       setStatus(`Deposited. tx ${h}`);
       load();
@@ -99,7 +99,7 @@ export default function Home() {
     try {
       const w = await wallet();
       setStatus("Claiming...");
-      const h = await w.writeContract({ address: POOL_ADDRESS, abi: POOL_ABI, functionName: "claim" });
+      const h = await w.writeContract({ address: POOL_ADDRESS, abi: POOL_ABI, functionName: "claim", gas: 300000n });
       setStatus(`Claimed. tx ${h}`);
       load();
     } catch (e: any) {
